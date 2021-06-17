@@ -1,4 +1,8 @@
 ut_dep = declare_dependency(
            include_directories: include_directories('lib/ut/include/'))
 
-subdir('src')
+test_dep = [random_dep, ut_dep]
+
+test('test_random_seed',
+     executable('test_random_seed', 'src/random_seed.cpp',
+                dependencies: test_dep))
