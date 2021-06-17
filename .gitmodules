@@ -1,3 +1,6 @@
 [submodule "test/lib/ut"]
 	path = test/lib/ut
 	url = https://github.com/boost-ext/ut
+[submodule "lib/hash"]
+	path = lib/hash
+	url = https://github.com/kena-e8ac99/Hash

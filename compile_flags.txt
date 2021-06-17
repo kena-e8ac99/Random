@@ -1,5 +1,6 @@
 -c
 -I./include
+-I./lib/hash/include
 -I./test/lib/ut/include
 -std=c++20
 -Wall
