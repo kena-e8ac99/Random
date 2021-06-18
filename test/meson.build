@@ -10,3 +10,7 @@ test('test_random_seed',
 test('test_mt19937',
      executable('test_mt19937', 'src/mt19937.cpp',
                 dependencies: test_dep))
+
+test('test_mt19937_64',
+     executable('test_mt19937_64', 'src/mt19937_64.cpp',
+                dependencies: test_dep))
