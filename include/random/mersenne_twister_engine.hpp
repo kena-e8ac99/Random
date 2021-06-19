@@ -78,12 +78,12 @@ namespace reki
     // Public Methods
     constexpr void seed(result_type seed = default_seed)
     {
-      m_x_.front()
+      state_sequence_.front()
       = detail::mod<result_type, detail::shift<result_type, w>>(seed);
 
       for (std::size_t i = 1; i < state_size; ++i)
       {
-        result_type x = m_x_[i - 1];
+        result_type x = state_sequence_[i - 1];
 
         x ^= x >> (w - 2);
 
@@ -91,32 +91,33 @@ namespace reki
 
         x += detail::mod<result_type, n>(i);
 
-        m_x_[i] = detail::mod<result_type, detail::shift<result_type, w>>(x);
+        state_sequence_[i]
+        = detail::mod<result_type, detail::shift<result_type, w>>(x);
       }
 
-      m_p_ = state_size;
+      pos_ = state_size;
     }
 
     constexpr void discard(unsigned long long z)
     {
-      while (z > state_size - m_p_)
+      while (z > state_size - pos_)
       {
-        z -= state_size - m_p_;
+        z -= state_size - pos_;
 
         gen_rand_();
       }
 
-      m_p_ += z;
+      pos_ += z;
     }
 
     constexpr result_type operator()()
     {
-      if (m_p_ >= state_size)
+      if (pos_ >= state_size)
       {
         gen_rand_();
       }
 
-      result_type z = m_x_[m_p_++];
+      result_type z = state_sequence_[pos_++];
 
       z ^= (z >> u) & d;
 
@@ -131,9 +132,9 @@ namespace reki
 
   private:
     // Private Members
-    std::array<result_type, state_size> m_x_{};
+    std::array<result_type, state_size> state_sequence_{};
 
-    std::size_t                         m_p_{};
+    std::size_t                         pos_{};
 
     // Private Methods
     constexpr void gen_rand_()
@@ -144,24 +145,29 @@ namespace reki
 
       for (std::size_t k = 0, end = n - m; k < end; ++k)
       {
-        result_type y = ((m_x_[k] & upper_mask) | (m_x_[k + 1] & lower_mask));
+        result_type y = ((state_sequence_[k] & upper_mask)
+                         | (state_sequence_[k + 1] & lower_mask));
 
-        m_x_[k] = (m_x_[k + m] ^ (y >> 1) ^ ((y & 0x01) ? a : 0));
+        state_sequence_[k] = (state_sequence_[k + m] ^ (y >> 1)
+                              ^ ((y & 0x01) ? a : 0));
       }
 
       for (std::size_t k = (n - m), end = n - 1; k < end; ++k)
       {
-        result_type y = ((m_x_[k] & upper_mask) | (m_x_[k + 1] & lower_mask));
+        result_type y = ((state_sequence_[k] & upper_mask)
+                         | (state_sequence_[k + 1] & lower_mask));
 
-        m_x_[k] = (m_x_[k + (m - n)] ^ (y >> 1) ^ ((y & 0x01) ? a : 0));
+        state_sequence_[k] = (state_sequence_[k + (m - n)]
+                              ^ (y >> 1) ^ ((y & 0x01) ? a : 0));
       }
 
-      result_type y = ((m_x_[n - 1]  & upper_mask) |
-                       (m_x_.front() & lower_mask));
+      result_type y = ((state_sequence_[n - 1]  & upper_mask) |
+                       (state_sequence_.front() & lower_mask));
 
-      m_x_[n - 1] = (m_x_[m - 1] ^ (y >> 1) ^ ((y & 0x01) ? a : 0));
+      state_sequence_[n - 1] = (state_sequence_[m - 1] ^ (y >> 1)
+                                ^ ((y & 0x01) ? a : 0));
 
-      m_p_ = 0;
+      pos_ = 0;
     }
   };
 }
